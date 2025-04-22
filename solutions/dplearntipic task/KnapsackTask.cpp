@@ -2,6 +2,7 @@
 #include <vector>
 
 int main() {
+    
     int n, m;
     std::cin >> n >> m;
     std::vector<long long> w(n), c(n);
