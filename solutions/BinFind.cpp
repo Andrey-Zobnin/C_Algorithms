@@ -54,6 +54,11 @@ int FindMaximumPossibleMinimumDistanceBetweenBovines(
 }
 
 int main() {
+    freopen("cows.in", "r", stdin);
+    freopen("cows.out", "w", stdout);
+    std::ios::sync_with_stdio(0); 
+    std::cin.tie(0);
+    
     int TotalNumberOfStallsAvailable;
     int TotalNumberOfBovinesToAccommodate;
     std::cin >> TotalNumberOfStallsAvailable >> TotalNumberOfBovinesToAccommodate;
