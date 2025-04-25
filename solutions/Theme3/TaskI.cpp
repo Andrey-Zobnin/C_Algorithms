@@ -4,37 +4,41 @@
 
 class StringHasher {
 private:
-    const int prime = 41;
-    const int mod = 1e9 + 7;
-    std::vector<int> prefix_hashes;
-    std::vector<int> powers;
+    const long long prime = 137;
+    const long long mod = 1e9 + 7;
+    std::vector<long long> power;
+    std::vector<long long> hashes;
+    size_t string_length;
 
 public:
-    StringHasher(const std::string& s) {
-        computePowers(s.length());
-        computePrefixHashes(s);
+    StringHasher(const std::string& s) : string_length(s.size()) {
+        computePowerArray();
+        computeHashArray(s);
     }
 
-    void computePowers(size_t length) {
-        powers.push_back(1);
-        for (size_t i = 0; i < length; ++i) {
-            powers.push_back((powers[i] * prime) % mod);
+    void computePowerArray() {
+        power.resize(string_length);
+        power[0] = 1;
+        for (size_t i = 1; i < string_length; ++i) {
+            power[i] = (power[i - 1] * prime) % mod;
         }
     }
 
-    void computePrefixHashes(const std::string& s) {
-        prefix_hashes.push_back(0);
-        prefix_hashes.push_back(s[0] - 'a' + 1);
-        for (size_t i = 1; i < s.length(); ++i) {
-            long long hash = (prefix_hashes[i] * prime) % mod;
-            hash = (hash + (s[i] - 'a' + 1)) % mod;
-            prefix_hashes.push_back(hash);
+    void computeHashArray(const std::string& s) {
+        hashes.resize(string_length + 1);
+        hashes[0] = 0;
+        for (size_t i = 1; i <= string_length; ++i) {
+            hashes[i] = (hashes[i - 1] + (s[i - 1] - 'a' + 1) * power[string_length - i]) % mod;
         }
     }
 
-    int getHash(int a, int b) const {
-        long long hash = prefix_hashes[b + 1] - prefix_hashes[a] * powers[b - a + 1] % mod;
-        return (hash + mod) % mod;
+    long long getHash(size_t l, size_t r) const {
+        // Adjust for 1-based indexing in the original code
+        return (hashes[r] - hashes[l - 1] + mod) % mod * power[l - 1] % mod;
+    }
+
+    size_t length() const {
+        return string_length;
     }
 };
 
@@ -42,16 +46,26 @@ class BorderFinder {
 public:
     static std::string findLongestBorder(const std::string& s) {
         StringHasher hasher(s);
-        int n = s.length();
+        size_t n = hasher.length();
+        size_t max_border = 0;
 
-        for (int i = n - 1; i > 0; --i) {
-            if (hasher.getHash(0, i - 1) == hasher.getHash(n - i, n - 1)) {
-                for (int j = 1; j < n - i; ++j) {
-                    if (hasher.getHash(0, i - 1) == hasher.getHash(j, j + i - 1)) {
-                        return s.substr(0, i);
+        for (size_t i = 1; i <= n - 2; ++i) {
+            long long prefix_hash = hasher.getHash(1, i);
+            long long suffix_hash = hasher.getHash(n - i + 1, n);
+
+            if (prefix_hash == suffix_hash) {
+                for (size_t j = 2; j <= n - i; ++j) {
+                    long long middle_hash = hasher.getHash(j, j + i - 1);
+                    if (middle_hash == prefix_hash) {
+                        max_border = i;
+                        break;
                     }
                 }
             }
+        }
+
+        if (max_border > 0) {
+            return s.substr(0, max_border);
         }
         return "Just a legend";
     }
