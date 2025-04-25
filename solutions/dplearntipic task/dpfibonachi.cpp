@@ -32,6 +32,6 @@ long long fibonachi(int n) {
 
 int main() {
     int n = 10;
-    std::cout << "Fibonacci(" << n << ") = " << fibonachi(n) << std::endl;
+    std::cout << n << fibonachi(n) << std::endl;
     return 0;
 }
